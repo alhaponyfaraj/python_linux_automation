@@ -13,14 +13,15 @@ work_dir = pathlib.Path(__file__).parent.absolute()
 host_server_hostname = "192.168.1.81"
 host_server_username = "webmaster"
 host_server_password = "webmaster"
-
 host_ssh = paramiko.SSHClient()
-
 host_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
 #host_ssh.connect('<hostname>', username='<username>', password='<password>')
-
 host_ssh.connect(host_server_hostname, username=host_server_username, password=host_server_password)
+
+
+
+
+
 
 
 stdin, stdout, stderr = host_ssh.exec_command("mkdir ~/by_python_script/")
@@ -35,8 +36,9 @@ print(file_to_send)
 scp1.put(file_to_send, '~/by_python_script/firewall_rules.sh')
 
 host_ssh.exec_command("chmod +x ~/by_python_script/firewall_rules.sh")
-host_ssh.exec_command("cd ~/by_python_script/ && ./firewall_rules.sh")
-
+host_ssh.exec_command("sudo yum install -y dos2unix")
+host_ssh.exec_command("dos2unix ~/by_python_script/firewall_rules.sh")
+host_ssh.exec_command("cd ~/by_python_script/ && echo y |./firewall_rules.sh")
 
 scp1.close()
 
@@ -65,8 +67,10 @@ print(file_to_send)
 scp2.put(file_to_send, '~/by_python_script/firewall_rules.sh')
 
 guest_ssh.exec_command("chmod +x ~/by_python_script/firewall_rules.sh")
-guest_ssh.exec_command("cd ~/by_python_script/ && ./firewall_rules.sh")
-
+# Fix bash script binaries after transferring
+guest_ssh.exec_command("sudo apt install -y dos2unix")
+guest_ssh.exec_command("dos2unix ~/by_python_script/firewall_rules.sh")
+guest_ssh.exec_command("cd ~/by_python_script/ && echo y | ./firewall_rules.sh")
 
 scp2.close()
 guest_ssh.close()
